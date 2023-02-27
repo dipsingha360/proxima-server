@@ -71,11 +71,34 @@ const deleteProject = async (req, res) => {
 
 // update a project
 const updateProject = async (req, res) => {
+  const data = req.body;
   const { id } = req.params;
+  const { title, tech, budget, duration, manager, dev } = data;
+
+  let emptyFields = [];
+
+  if (!title) emptyFields.push("title");
+  if (!tech) emptyFields.push("tech");
+  if (!budget) emptyFields.push("budget");
+  if (!duration) emptyFields.push("duration");
+  if (!manager) emptyFields.push("manager");
+  if (!dev) emptyFields.push("dev");
+
+  if (emptyFields.length > 0) {
+    return res
+      .status(400)
+      .json({ error: "Please fill in the blank fields", emptyFields });
+  }
+
+  // id validation
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(404).json({ error: "Invalid id" });
   }
-  const project = await Project.findOneAndUpdate({ _id: id });
+  const project = await Project.findOneAndUpdate(
+    { _id: id },
+    { ...data },
+    { new: true }
+  );
 
   if (!project) {
     return res.status(400).json({ error: "No project found" });
