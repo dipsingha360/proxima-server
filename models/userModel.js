@@ -16,6 +16,7 @@ const userSchema = new Schema({
   },
 });
 
+//sugnup function
 userSchema.statics.signup = async function (email, password) {
   // validation
   if (!email || !password) {
@@ -46,6 +47,27 @@ userSchema.statics.signup = async function (email, password) {
 
   // create user
   const user = await this.create({ email, password: hash });
+
+  return user;
+};
+
+// login function
+userSchema.statics.login = async function (email, password) {
+  // validation
+  if (!email || !password) {
+    throw Error("Email and Password must be filled");
+  }
+
+  const user = await this.findOne({ email });
+
+  if (!user) {
+    throw Error("Incorrect email");
+  }
+
+  const matchPassword = await bcrypt.compare(password, user.password);
+  if (!matchPassword) {
+    throw Error("Incorrect password");
+  }
 
   return user;
 };
